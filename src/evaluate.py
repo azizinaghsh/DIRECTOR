@@ -7,7 +7,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 import pandas as pd
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 
 from utils.random_utils import set_random_seed
 
@@ -34,14 +34,14 @@ def main(config: DictConfig) -> Optional[float]:
         ]
     )
 
-    train_dataset = deepcopy(dataset).set_split("train").subset(range(10))  # Use a small subset of length 10
+    train_dataset = Subset(deepcopy(dataset).set_split("train"), range(10))  # Use a small subset of length 10
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=config.batch_size,
         num_workers=config.compnode.num_workers,
         pin_memory=True,
     )
-    test_dataset = deepcopy(dataset).set_split("test").subset(range(10))  # Use a small subset of length 10
+    test_dataset = Subset(deepcopy(dataset).set_split("test"), range(10))  # Use a small subset of length 10
     test_dataloader = DataLoader(
         test_dataset,
         batch_size=config.batch_size,
