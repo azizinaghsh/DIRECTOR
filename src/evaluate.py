@@ -48,7 +48,7 @@ def main(config: DictConfig) -> Optional[float]:
         num_workers=config.compnode.num_workers,
         pin_memory=True,
     )
-    diffuser.get_matrix = train_dataset.get_matrix
+    diffuser.get_matrix = dataset.get_matrix
     diffuser.modalities = list(train_dataset.modality_datasets.keys())
 
     metrics_dict = {}
