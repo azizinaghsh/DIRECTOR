@@ -34,14 +34,14 @@ def main(config: DictConfig) -> Optional[float]:
         ]
     )
 
-    train_dataset = deepcopy(dataset).set_split("train")
+    train_dataset = deepcopy(dataset).set_split("train", 0.05)
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=config.batch_size,
         num_workers=config.compnode.num_workers,
         pin_memory=True,
     )
-    test_dataset = deepcopy(dataset).set_split("test")
+    test_dataset = deepcopy(dataset).set_split("test", 0.05)
     test_dataloader = DataLoader(
         test_dataset,
         batch_size=config.batch_size,
