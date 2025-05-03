@@ -75,30 +75,41 @@ def encode_text(
 
 
 def get_batch(
-    prompt: str,
+    prompts: List[str],
     sample_id: str,
     clip_model: clip.model.CLIP,
     dataset: MultimodalDataset,
     seq_feat: bool,
     device: torch.device,
 ) -> Dict[str, Any]:
+    batch_size = len(prompts)
+
     # Get base batch
     sample_index = dataset.root_filenames.index(sample_id)
-    raw_batch = dataset[sample_index]
-    batch = collate_fn([to_device(raw_batch, device)])
+    raw_sample = dataset[sample_index]
+    raw_sample_device = to_device(raw_sample, device) 
+
+    if batch_size == 1:
+        batch = collate_fn([raw_sample_device])
+    else:
+        batch_list = [raw_sample_device] * batch_size
+        batch = collate_fn(batch_list)
 
     # Encode text
-    caption_seq, caption_tokens = encode_text([prompt], clip_model, None, device)
+    caption_seq_list, caption_tokens = encode_text(prompts, clip_model, None, device)
 
     if seq_feat:
-        caption_feat = caption_seq[0]
-        caption_feat = F.pad(caption_feat, (0, 0, 0, 77 - caption_feat.shape[0]))
-        caption_feat = caption_feat.unsqueeze(0).permute(0, 2, 1)
+        padded_seqs = []
+        for seq in caption_seq_list:
+            padded_seq = F.pad(seq, (0, 0, 0, 77 - seq.shape[0]))
+            padded_seqs.append(padded_seq)
+        caption_feat = torch.stack(padded_seqs, dim=0)
+        caption_feat = caption_feat.permute(0, 2, 1)
     else:
         caption_feat = caption_tokens
 
     # Update batch
-    batch["caption_raw"] = [prompt]
+    batch["caption_raw"] = prompts
     batch["caption_feat"] = caption_feat
 
     return batch
@@ -106,6 +117,7 @@ def get_batch(
 
 def init(
     config_name: str,
+    batch_size = 1
 ) -> Tuple[Diffuser, clip.model.CLIP, MultimodalDataset, torch.device]:
     with initialize(version_base="1.3", config_path="../configs"):
         config = compose(config_name=config_name)
@@ -126,7 +138,7 @@ def init(
 
     # Initialize dataset
     config.dataset.char.load_vertices = True
-    config.batch_size = 1
+    config.batch_size = batch_size
     dataset = instantiate(config.dataset)
     dataset.set_split("test")
     diffuser.modalities = list(dataset.modality_datasets.keys())

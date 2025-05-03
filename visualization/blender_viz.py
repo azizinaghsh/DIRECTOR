@@ -42,7 +42,7 @@ class GenerationAddon(bpy.types.Operator):
 
         # Inference
         seq_feat = diffuser.net.model.clip_sequential
-        batch = get_batch(prompt, sample_id, clip_model, dataset, seq_feat, device)
+        batch = get_batch([prompt], sample_id, clip_model, dataset, seq_feat, device)
         with torch.no_grad():
             out = diffuser.predict_step(batch, 0)
 

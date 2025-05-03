@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
         # Inference
         seq_feat = diffuser.net.model.clip_sequential
-        batch = get_batch(PROMPT, SAMPLE_ID, clip_model, dataset, seq_feat, device)
+        batch = get_batch([PROMPT], SAMPLE_ID, clip_model, dataset, seq_feat, device)
         with torch.no_grad():
             out = diffuser.predict_step(batch, 0)
 

@@ -10,7 +10,7 @@ outdir: null
 entity: null
 project_name: trajectory-diffusion
 results_dir: ./results
-data_dir: ./et-data
+data_dir: ./sample-data
 xp_name: ${diffuser.loss.name}-${diffuser.network.module.name}-${dataset.name}
 log_dir: ${results_dir}/${xp_name}/${timestamp}
 checkpoint_path: checkpoints/director/ca-mixed-e449.ckpt
